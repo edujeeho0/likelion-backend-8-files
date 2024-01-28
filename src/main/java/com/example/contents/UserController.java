@@ -29,6 +29,14 @@ public class UserController {
         return service.readUserByUsername(username);
     }
 
+    @PutMapping("/{id}")
+    public UserDto update(
+            @PathVariable("id") Long id,
+            @RequestBody UserDto userDto
+    ) {
+        return service.updateUser(id, userDto);
+    }
+
     @PutMapping("/{userId}/avatar")
     public UserDto avatar(
             @PathVariable("userId")

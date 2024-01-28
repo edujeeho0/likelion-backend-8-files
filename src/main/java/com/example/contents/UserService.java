@@ -2,7 +2,6 @@ package com.example.contents;
 
 import com.example.contents.dto.UserDto;
 import com.example.contents.entity.User;
-import com.example.contents.exceptions.UsernameExistsException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,14 +23,12 @@ public class UserService {
     // CREATE USER
     // 회원가입
     public UserDto create(UserDto dto) {
-            // 사용자 생성 전 계정 이름 겹침 확인 후
-            // 확인 했을때 겹칠 경우 400
-            if (repository.existsByUsername(dto.getUsername()))
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "duplicate username");
-//            throw new IllegalArgumentException("duplicate username");
-                throw new UsernameExistsException();
+        // 사용자 생성 전 계정 이름 겹침 확인 후
+        // 확인 했을때 겹칠 경우 400
+        if (repository.existsByUsername(dto.getUsername()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "duplicate username");
 
-            User newUser = new User(
+        User newUser = new User(
                dto.getUsername(),
                dto.getEmail(),
                dto.getPhone(),
@@ -50,9 +47,20 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
         return UserDto.fromEntity(optionalUser.get());
-        /*return repository.findByUsername(username)
-                .map(UserDto::fromEntity)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));*/
+    }
+
+    // UPDATE USER
+    // 회원 정보 수정
+    public UserDto updateUser(Long id, UserDto dto) {
+        Optional<User> optionalUser
+                = repository.findById(id);
+        if (optionalUser.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+
+        User userEntity = optionalUser.get();
+        userEntity.setPhone(dto.getPhone());
+        userEntity.setBio(dto.getBio());
+        return UserDto.fromEntity(repository.save(userEntity));
     }
 
     // UPDATE USER AVATAR
